@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@org.springframework.stereotype.Service
 public class ArabicRootExtractor implements RootwordService{
 
     // Common Arabic prefixes
@@ -22,6 +23,13 @@ public class ArabicRootExtractor implements RootwordService{
     // Function to extract root letters
     @Override
     public String extractRoot(String word) {
+        if (word == null || word.length() > 64 || !word.matches("[\\u0621-\\u063A\\u0641-\\u0652\\u0670\\u0640]+")) {
+            throw new IllegalArgumentException("Invalid Arabic word");
+        }
+        word = word.replaceAll("[\\u064B-\\u0652\\u0670\\u0640]", "");
+        if (word.length() < 3) {
+            throw new IllegalArgumentException("Insufficient Arabic letters");
+        }
         // Step 1: Remove common prefixes
         word = removePrefixes(word);
 
@@ -35,7 +43,7 @@ public class ArabicRootExtractor implements RootwordService{
     // Helper function to remove common Arabic prefixes
     private String removePrefixes(String word) {
         for (String prefix : PREFIXES) {
-            if (word.startsWith(prefix)) {
+            if (word.startsWith(prefix) && word.length() - prefix.length() >= 3) {
                 word = word.substring(prefix.length());
             }
         }
@@ -45,7 +53,7 @@ public class ArabicRootExtractor implements RootwordService{
     // Helper function to remove common Arabic suffixes
     private String removeSuffixes(String word) {
         for (String suffix : SUFFIXES) {
-            if (word.endsWith(suffix)) {
+            if (word.endsWith(suffix) && word.length() - suffix.length() >= 3) {
                 word = word.substring(0, word.length() - suffix.length());
                 break;
             }
@@ -59,12 +67,15 @@ public class ArabicRootExtractor implements RootwordService{
 
         // Iterate through the word and pick out likely root letters (ignoring weak letters)
         for (char letter : word.toCharArray()) {
-            if (!WEAK_LETTERS.contains(letter)) {
+            if (word.length() == 3 || !WEAK_LETTERS.contains(letter)) {
                 root.append(letter);
             }
         }
 
-        // Return first three non-weak letters as the root
+        if (root.length() < 3) {
+            throw new IllegalArgumentException("No three-letter candidate found");
+        }
+        // Return first three non-weak letters as the candidate
         return root.length() > 3 ? root.substring(0, 3) : root.toString();
     }
 }
