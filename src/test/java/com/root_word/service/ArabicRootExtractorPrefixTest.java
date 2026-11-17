@@ -11,6 +11,22 @@ class ArabicRootExtractorPrefixTest {
 
     @ParameterizedTest(name = "{0} should resolve to {1}")
     @CsvSource({
+            "فالحرف, حرف",
+            "فالطهارة, طهر",
+            "فالأصل, أصل"
+    })
+    void recognisesArticleFollowingFaConjunction(String word, String expectedRoot) {
+        assertEquals(expectedRoot, extractor.extractRoot(word));
+    }
+
+    @ParameterizedTest
+    @CsvSource("فهم, فهم")
+    void preservesFaWhenItBelongsToTheRoot(String word, String expectedRoot) {
+        assertEquals(expectedRoot, extractor.extractRoot(word));
+    }
+
+    @ParameterizedTest(name = "{0} should resolve to {1}")
+    @CsvSource({
             "والكتب, كتب",
             "والعرب, عرب",
             "والرمح, رمح",
