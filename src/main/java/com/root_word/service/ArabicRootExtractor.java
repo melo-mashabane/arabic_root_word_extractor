@@ -16,6 +16,7 @@ public class ArabicRootExtractor implements RootwordService{
 
     // Known weak letters (used in irregular verbs and nouns)
     private static final Set<Character> WEAK_LETTERS = new HashSet<>(Arrays.asList('ا', 'و', 'ي'));
+    public static final String CONJUENCTION_ARTICLE = "وال";
 
     public ArabicRootExtractor() {
     }
@@ -42,6 +43,11 @@ public class ArabicRootExtractor implements RootwordService{
 
     // Helper function to remove common Arabic prefixes
     private String removePrefixes(String word) {
+        // Recognise conjunction + article as a unit before checking single prefixes.
+        // Stop here so letters in the remaining stem are not stripped as more prefixes.
+        if (word.startsWith(CONJUENCTION_ARTICLE) && word.length() - 3 >= 3) {
+            return word.substring(3);
+        }
         for (String prefix : PREFIXES) {
             if (word.startsWith(prefix) && word.length() - prefix.length() >= 3) {
                 word = word.substring(prefix.length());
