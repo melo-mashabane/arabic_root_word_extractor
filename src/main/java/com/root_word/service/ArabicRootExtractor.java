@@ -71,6 +71,13 @@ public class ArabicRootExtractor implements RootwordService{
 
     // Function to extract a triliteral root, considering weak letters
     private String extractTrilateralRoot(String word) {
+        // In the bounded C-waw-alif-C pattern (e.g. جواب), alif is
+        // the pattern letter while waw remains a candidate root letter.
+        if (word.length() == 4 && word.charAt(1) == 'و' && word.charAt(2) == 'ا'
+                && !WEAK_LETTERS.contains(word.charAt(0))
+                && !WEAK_LETTERS.contains(word.charAt(3))) {
+            return word.substring(0, 2) + word.charAt(3);
+        }
         StringBuilder root = new StringBuilder();
 
         // Iterate through the word and pick out likely root letters (ignoring weak letters)
